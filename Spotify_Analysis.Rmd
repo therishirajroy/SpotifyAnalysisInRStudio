@@ -1,0 +1,115 @@
+---
+title: "**Spotify Analysis**"
+output: html_notebook
+---
+
+```{r}
+# Import packages
+library(tidyverse)
+library(ggplot2)
+library(corrplot)
+```
+```{r}
+# Load the data
+data <- read_csv("D:/Python/Cleaned_SpotifyAnalysis.csv")
+head(data)
+```
+## Data Exploration
+```{r}
+# Summary
+summary(data)
+```
+```{r}
+# Structure of data
+str(data)
+```
+## Data Cleaning
+```{r}
+# Check for missing values
+sum(is.na(data))
+```
+## Exploratory Data Analyis
+```{r}
+# Correlation matrix
+cor_matrix = cor(data%>% select(is.numeric))
+corrplot(cor_matrix,method="circle",type="lower",tl.col="black",tl.srt=25)
+```
+```{r}
+# Distribution of numerical variables
+data %>% select_if(is.numeric) %>% gather() %>%
+  ggplot(aes(value)) +
+  facet_wrap(~key, scales = "free") +
+  geom_histogram(bins = 30) +
+  labs(x = "Value", y = "Count")
+```
+```{r}
+# Popularity by year
+data %>%
+  ggplot(aes(Year, Popularity)) +
+  geom_point() +
+  geom_smooth() +
+  labs(x = "Year", y = "Popularity", title = "Popularity by Year")
+```
+```{r}
+# Danceability vs Energy
+data %>%
+  ggplot(aes(Danceability, Energy)) +
+  geom_point() +
+  geom_smooth() +
+  labs(x = "Danceability", y = "Energy", title = "Danceability vs Energy")
+```
+## Insights
+```{r}
+# Most popular artists
+data %>%
+  group_by(Artist) %>%
+  summarize(avg_popularity = mean(Popularity)) %>%
+  arrange(desc(avg_popularity)) %>%
+  head(5) %>%
+  pull(Artist)
+```
+```{r}
+# Most common time signatures
+data %>%
+  count(Time_Signature, sort = TRUE) %>%
+  head(3) %>%
+  pull(Time_Signature)
+```
+```{r}
+# Descriptive stat
+descriptive_stats <- data %>%
+  summarise(
+    Average_Duration = mean(Duration, na.rm = TRUE),
+    Median_Duration = median(Duration, na.rm = TRUE),
+    Min_Duration = min(Duration, na.rm = TRUE),
+    Max_Duration = max(Duration, na.rm = TRUE),
+    
+    Average_Danceability = mean(Danceability, na.rm = TRUE),
+    Median_Danceability = median(Danceability, na.rm = TRUE),
+    Min_Danceability = min(Danceability, na.rm = TRUE),
+    Max_Danceability = max(Danceability, na.rm = TRUE),
+    
+    Average_Energy = mean(Energy, na.rm = TRUE),
+    Median_Energy = median(Energy, na.rm = TRUE),
+    Min_Energy = min(Energy, na.rm = TRUE),
+    Max_Energy = max(Energy, na.rm = TRUE),
+    
+    Average_Popularity = mean(Popularity, na.rm = TRUE),
+    Median_Popularity = median(Popularity, na.rm = TRUE),
+    Min_Popularity = min(Popularity, na.rm = TRUE),
+    Max_Popularity = max(Popularity, na.rm = TRUE)
+  )
+
+# Display the descriptive statistics
+print(descriptive_stats)
+```
+
+```{r}
+# Genres with highest average valence
+data %>%
+  group_by(Artist) %>%
+  summarize(avg_valence = mean(Valence)) %>%
+  arrange(desc(avg_valence)) %>%
+  head(3) %>%
+  pull(Artist)
+```
